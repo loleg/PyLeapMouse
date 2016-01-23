@@ -7,14 +7,26 @@ import math
 import sys
 from leap import Leap, Mouse
 from MiscFunctions import *
+from Xlib import X, display
+from Xlib.ext import randr
 
+d = display.Display()
+s = d.screen()
+print 'Width: {}, Height: {}'.format(s.width_in_pixels, s.height_in_pixels)
+# window = s.root.create_window(0, 0, 1, 1, 1, s.root_depth)
+# res = randr.get_screen_resources(window)
+# for mode in res.modes:
+#     w, h = mode.width, mode.height
+#     print "Width: {}, Height: {}".format(w, h)
 
 class Finger_Control_Listener(Leap.Listener):  #The Listener that we attach to the controller. This listener is for pointer finger movement
+    # Last Touch
+    lt = 0
     def __init__(self, mouse, smooth_aggressiveness=8, smooth_falloff=1.3):
         super(Finger_Control_Listener, self).__init__()  #Initialize like a normal listener
         #Initialize a bunch of stuff specific to this implementation
         self.screen = None
-        self.screen_resolution = (1920,1080)
+        self.screen_resolution = (s.width_in_pixels, s.height_in_pixels)
         self.cursor = mouse.absolute_cursor()  #The cursor object that lets us control mice cross-platform
         self.mouse_position_smoother = mouse_position_smoother(smooth_aggressiveness, smooth_falloff) #Keeps the cursor from fidgeting
         self.mouse_button_debouncer = debouncer(5)  #A signal debouncer that ensures a reliable, non-jumpy click
@@ -38,6 +50,9 @@ class Finger_Control_Listener(Leap.Listener):  #The Listener that we attach to t
         stabilizedPosition = finger.stabilized_tip_position
         interactionBox = frame.interaction_box
         normalizedPosition = interactionBox.normalize_point(stabilizedPosition)
+        if finger.touch_zone != self.lt:
+            print 'finger touch zone: {}'.format(finger.touch_zone)
+            self.lt = finger.touch_zone
         if finger.touch_zone > 0:
             finger_count = len(frame.fingers)
             if finger.touch_zone == 1:

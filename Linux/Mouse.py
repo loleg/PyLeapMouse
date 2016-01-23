@@ -10,11 +10,11 @@ def AbsoluteMouseClick(posx,posy):
     mouse.click(posx, posy)
 
 def AbsoluteMouseClickDown(posx, posy):
-    print 'left button down'
+    #print 'left button down'
     mouse.press(posx, posy)
 
 def AbsoluteMouseClickUp(posx, posy):
-    print 'left button up'
+    #print 'left button up'
     mouse.release(posx, posy)
 
 def AbsoluteMouseDrag(posx, posy):  #Only relevant in OS X(?)
@@ -24,12 +24,12 @@ def AbsoluteMouseRightClick(posx,posy):
     mouse.click(posx, posy, button=2)
 
 def AbsoluteMouseScroll(posx, posy, up=True):  #PyUserInput doesn't appear to support relative scrolling
-    if up is True:
-        mouse.click(posx, posy, button=4)
-    elif up is False:
-        mouse.click(posx, posy, button=5)
+    #if up is True:
+    #    mouse.click(posx, posy, button=4)
+    #elif up is False:
+    #    mouse.click(posx, posy, button=5)
     #When PyUserInput > 0.1.5 is released, the following will work:
-    #mouse.scroll(posx, posy, up)
+    mouse.scroll(posx, posy, None)#up)
 
 def GetDisplayWidth():
     return mouse.screen_size()[0]
