@@ -28,6 +28,7 @@ def main():
     motion_mode = False
     smooth_aggressiveness = 8
     smooth_falloff = 1.3
+    scroll_continuous = False
 
     for i in range(0,len(sys.argv)):
         arg = sys.argv[i].lower()
@@ -43,6 +44,13 @@ def main():
             smooth_falloff = float(sys.argv[i+1])
         if "--smooth-aggressiveness" in arg:
             smooth_aggressiveness = int(sys.argv[i+1])
+            
+        if "--scroll_continuous" in arg:
+            if (palm_mode):
+                scroll_continuous = True
+            else:
+                print 'scroll_continuous only applies to palm mode'
+            
 
     listener = None;  #I'm tired and can't think of a way to organize this segment nicely
 
@@ -51,7 +59,7 @@ def main():
         listener = Finger_Control_Listener(Mouse, smooth_aggressiveness=smooth_aggressiveness, smooth_falloff=smooth_falloff)
         print "Using finger mode..."
     elif palm_mode:  #Palm control mode
-        listener = Palm_Control_Listener(Mouse)
+        listener = Palm_Control_Listener(Mouse, scroll_continuous=scroll_continuous)
         print "Using palm mode..."
     elif motion_mode:  #Motion control mode
         listener = Motion_Control_Listener(Mouse)
