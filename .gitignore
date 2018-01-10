@@ -10,6 +10,7 @@
 
 #files
 Leap.py
+Linux/*.so
 
 #directories
 .idea
@@ -23,6 +24,7 @@ lib64
 parts
 sdist
 var
+env
 
 #other
 .DS_Store

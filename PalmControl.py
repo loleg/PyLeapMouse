@@ -10,12 +10,17 @@ from MiscFunctions import *
 
 
 class Palm_Control_Listener(Leap.Listener):  #The Listener that we attach to the controller. This listener is for palm tilt movement
-    def __init__(self, mouse):
+    def __init__(self, mouse, scroll_continuous=False):
         super(Palm_Control_Listener, self).__init__()  #Initialize like a normal listener
         #Initialize a bunch of stuff specific to this implementation
         self.cursor = mouse.relative_cursor()  #The cursor object that lets us control mice cross-platform
         self.gesture_debouncer = n_state_debouncer(5,3)  #A signal debouncer that ensures a reliable, non-jumpy gesture detection
 
+        if scroll_continuous:
+            self.do_scroll = self.do_scroll_continuous
+        else:
+            self.do_scroll = self.do_scroll_velocity
+            
     def on_init(self, controller):
         print "Initialized"
 
@@ -46,6 +51,19 @@ class Palm_Control_Listener(Leap.Listener):  #The Listener that we attach to the
          pitch = hand_normal_direction.pitch()
          mouse_velocity = self.convert_angles_to_mouse_velocity(roll, pitch)
          self.cursor.move(mouse_velocity[0], mouse_velocity[1])
+         
+    def do_scroll_continuous(self, hand):
+         hand_normal_direction = Geometry.to_vector(hand.palm_normal)
+         hand_direction = Geometry.to_vector(hand.direction)
+         roll = hand_normal_direction.roll()
+         pitch = hand_normal_direction.pitch()
+         velocity = self.convert_angles_to_mouse_velocity(roll, pitch) * 100
+         self.cursor.scroll(velocity[0], velocity[1])
+         
+    def do_scroll_velocity(self, hand):
+        y_scroll_amount = self.velocity_to_scroll_amount(hand.palm_velocity.y)  #Mouse hand controls scroll amount
+        x_scroll_amount = self.velocity_to_scroll_amount(hand.palm_velocity.x)
+        self.cursor.scroll(x_scroll_amount, y_scroll_amount)
 
     #The gesture hand signals what action to do,
     #The mouse hand gives extra data (if applicable)
@@ -60,9 +78,7 @@ class Palm_Control_Listener(Leap.Listener):  #The Listener that we attach to the
         #Now that we've told the debouncer what we *think* the current gesture is, we must act
         #On what the debouncer thinks the gesture is
         if self.gesture_debouncer.state == 2:  #Scroll mode
-            y_scroll_amount = self.velocity_to_scroll_amount(mouse_hand.palm_velocity.y)  #Mouse hand controls scroll amount
-            x_scroll_amount = self.velocity_to_scroll_amount(mouse_hand.palm_velocity.x)
-            self.cursor.scroll(x_scroll_amount, y_scroll_amount)
+            self.do_scroll(mouse_hand)
         elif self.gesture_debouncer.state == 1:  #Click/drag mode
             if not self.cursor.left_button_pressed: self.cursor.click_down()  #Click down (if needed)
             self.do_mouse_stuff(mouse_hand)  #We may want to click and drag
